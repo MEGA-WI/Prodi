@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caja Musical — Comparte · Descubre · Escucha</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0a0a0f;
+      --surface:  #111118;
+      --card:     #16161f;
+      --border:   #1e1e2e;
+      --accent:   #a259ff;
+      --accent2:  #ff6b6b;
+      --accent3:  #4ecdc4;
+      --text:     #e8e8f0;
+      --muted:    #6b6b80;
+      --gold:     #ffd700;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem 2.5rem;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 1.3rem; font-weight: 700; letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--accent); }
+    .logo-icon { font-size: 1.5rem; }
+
+    .nav-cta {
+      background: var(--accent);
+      color: #fff; font-weight: 600; font-size: 0.85rem;
+      padding: 0.55rem 1.3rem; border-radius: 999px;
+      text-decoration: none; transition: opacity .2s;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+
+    .nav-right { display: flex; align-items: center; gap: 0.9rem; }
+    .nav-back {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      background: rgba(78,205,196,0.12); border: 1.5px solid var(--accent3);
+      color: var(--accent3); font-weight: 800; font-size: 1rem;
+      padding: 0.75rem 1.6rem 0.75rem 1.3rem; border-radius: 999px;
+      text-decoration: none; transition: background .2s, transform .2s, box-shadow .2s;
+      box-shadow: 0 0 0 rgba(78,205,196,0);
+    }
+    .nav-back:hover {
+      background: var(--accent3); color: #06211f;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(78,205,196,0.4);
+    }
+    .nav-back-icon { font-size: 1.1rem; transition: transform .2s; }
+    .nav-back:hover .nav-back-icon { transform: translateX(-4px); }
+    @media (max-width: 640px) {
+      .nav-back { font-size: 0.88rem; padding: 0.65rem 1.1rem 0.65rem 0.9rem; }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 7rem 2rem 4rem;
+      position: relative; overflow: hidden;
+    }
+
+    /* Animated waveform background */
+    .wave-bg {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0.06; pointer-events: none;
+    }
+    .wave-bg svg { width: 100%; max-width: 900px; }
+
+    .bars {
+      display: flex; align-items: flex-end; gap: 5px;
+      height: 180px; position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 0 5%; opacity: 0.05; pointer-events: none;
+    }
+    .bar {
+      flex: 1; background: var(--accent);
+      border-radius: 3px 3px 0 0;
+      animation: pulse 1.5s ease-in-out infinite alternate;
+    }
+    @keyframes pulse {
+      from { transform: scaleY(0.3); }
+      to   { transform: scaleY(1); }
+    }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(162,89,255,0.15);
+      border: 1px solid rgba(162,89,255,0.35);
+      color: var(--accent); font-size: 0.78rem; font-weight: 600;
+      padding: 0.4rem 1rem; border-radius: 999px;
+      margin-bottom: 1.5rem; letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 5rem);
+      font-weight: 900; line-height: 1.08;
+      letter-spacing: -2px; margin-bottom: 1.2rem;
+    }
+    h1 em { font-style: normal; color: var(--accent); }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--muted); max-width: 520px; line-height: 1.6;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── SEARCH (en el nav, siempre visible) ── */
+    .nav-search-wrap { position: relative; flex: 1; max-width: 420px; margin: 0 1.5rem; }
+    .search-wrap {
+      display: flex; align-items: center; gap: 0.6rem;
+      width: 100%;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 999px; padding: 0.55rem 1.1rem;
+      color: var(--muted);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(162,89,255,0.15); }
+    .search-wrap input {
+      flex: 1; min-width: 0; background: none; border: none; outline: none;
+      color: var(--text); font-family: inherit; font-size: 0.85rem;
+    }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-results {
+      position: absolute; z-index: 150; left: 0; right: 0; top: calc(100% + 10px);
+      text-align: left;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; max-height: 60vh; overflow-y: auto;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    @media (max-width: 900px) { .nav-search-wrap { display: none; } }
+    .search-result-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 0.8rem;
+      padding: 0.7rem 1.1rem; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background .15s;
+    }
+    .search-result-row:last-child { border-bottom: none; }
+    .search-result-row:hover { background: rgba(162,89,255,0.08); }
+    .search-result-row .srt { font-size: 0.82rem; color: var(--text); text-align: left; }
+    .search-result-row .src {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase;
+      color: var(--accent); background: rgba(162,89,255,0.12);
+      padding: 0.2rem 0.55rem; border-radius: 999px; white-space: nowrap; flex-shrink: 0;
+    }
+    .search-empty-row { padding: 1rem; font-size: 0.82rem; color: var(--muted); text-align: center; }
+
+    /* ── PROMO BANNER ── */
+    .promo-banner {
+      display: inline-flex; align-items: center; gap: 1rem;
+      background: linear-gradient(135deg, #1a0a2e, #0d1a1a);
+      border: 1px solid var(--accent);
+      border-radius: 18px; padding: 1.2rem 2rem;
+      margin-bottom: 2.5rem; position: relative; overflow: hidden;
+      box-shadow: 0 0 40px rgba(162,89,255,0.2);
+    }
+    .promo-banner::before {
+      content: '';
+      position: absolute; top: -50%; left: -50%;
+      width: 200%; height: 200%;
+      background: conic-gradient(from 0deg, transparent 0%, rgba(162,89,255,0.08) 25%, transparent 50%);
+      animation: spin 6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .promo-text { position: relative; z-index: 1; }
+    .promo-text .label {
+      font-size: 0.7rem; font-weight: 600; color: var(--accent3);
+      letter-spacing: 2px; text-transform: uppercase; display: block;
+      margin-bottom: 0.15rem;
+    }
+    .promo-text .price {
+      font-size: 2.4rem; font-weight: 900; color: var(--gold);
+      line-height: 1; letter-spacing: -1px;
+    }
+    .promo-text .price span { font-size: 1rem; font-weight: 400; color: var(--muted); }
+    .promo-text .desc { font-size: 0.78rem; color: var(--muted); margin-top: 0.2rem; }
+
+    .promo-divider {
+      width: 1px; height: 50px;
+      background: var(--border); position: relative; z-index: 1;
+    }
+
+    .promo-content { position: relative; z-index: 1; text-align: left; }
+    .promo-content strong {
+      display: block; font-size: 1.05rem; font-weight: 700; color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+    .promo-content p { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+
+    .promo-badge {
+      position: absolute; top: -10px; right: -10px;
+      background: var(--accent2); color: #fff;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 1px;
+      padding: 0.3rem 0.6rem; border-radius: 999px;
+      text-transform: uppercase; z-index: 2;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: #fff; font-weight: 700; font-size: 1rem;
+      padding: 0.9rem 2.2rem; border-radius: 999px;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 30px rgba(162,89,255,0.4);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 40px rgba(162,89,255,0.5);
+    }
+
+    /* ── FEATURES STRIP ── */
+    .features {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .feature-item {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 1rem 2rem; font-size: 0.85rem; color: var(--muted);
+      border-right: 1px solid var(--border);
+    }
+    .feature-item:last-child { border-right: none; }
+    .feature-item .icon { font-size: 1.1rem; }
+    .feature-item strong { color: var(--text); }
+
+    /* ── SECTION TITLES ── */
+    section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+
+    .section-header { text-align: center; margin-bottom: 3rem; }
+    .section-tag {
+      display: inline-block;
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+    .section-header h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 800; letter-spacing: -1px;
+    }
+    .section-header p { color: var(--muted); margin-top: 0.6rem; font-size: 0.95rem; }
+
+    /* ── GENRE GRID ── */
+    .genre-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+    }
+
+    .genre-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.4rem 1rem;
+      text-align: center; cursor: pointer;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+      position: relative; overflow: hidden;
+      text-decoration: none; color: inherit;
+      display: flex; flex-direction: column; align-items: center; gap: 0.7rem;
+    }
+    .genre-card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: var(--glow, transparent);
+      opacity: 0; transition: opacity .3s;
+      border-radius: 16px;
+    }
+    .genre-card:hover { transform: translateY(-4px); border-color: var(--accent); }
+    .genre-card:hover::after { opacity: 0.08; }
+    .genre-card:hover { box-shadow: 0 8px 30px rgba(162,89,255,0.15); }
+
+    .genre-section-label {
+      grid-column: 1 / -1;
+      display: flex; align-items: baseline; gap: 0.6rem;
+      padding: 0.3rem 0 0.2rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0.2rem;
+    }
+    .genre-section-label strong {
+      font-size: 0.8rem; font-weight: 700; color: var(--text);
+    }
+    .genre-section-label span {
+      font-size: 0.7rem; color: var(--muted);
+    }
+
+    .genre-hot {
+      border-color: rgba(255, 107, 107, 0.4);
+      background: linear-gradient(160deg, #1a0f0f, #16161f);
+    }
+    .genre-hot:hover { border-color: var(--accent2); box-shadow: 0 8px 30px rgba(255,107,107,0.2); }
+
+    .genre-top-badge {
+      position: absolute; top: 8px; right: 8px;
+      background: linear-gradient(135deg, #ff6b6b, #ff9a3c);
+      color: #fff; font-size: 0.55rem; font-weight: 800;
+      letter-spacing: 1px; padding: 0.2rem 0.45rem;
+      border-radius: 999px; text-transform: uppercase;
+    }
+
+    .genre-icon { font-size: 2.2rem; line-height: 1; }
+    .genre-name {
+      font-size: 0.82rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.8px; color: var(--text);
+    }
+    .genre-count { font-size: 0.7rem; color: var(--muted); }
+
+    /* ── OFFER SECTION ── */
+    .offer-section {
+      max-width: 1100px; margin: 0 auto 5rem;
+      padding: 0 2rem;
+    }
+
+    .offer-card {
+      background: linear-gradient(135deg, #0e0a1a 0%, #0a1a16 100%);
+      border: 1px solid var(--accent);
+      border-radius: 24px; padding: 3rem;
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 2rem; align-items: center;
+      position: relative; overflow: hidden;
+      box-shadow: 0 0 80px rgba(162,89,255,0.1);
+    }
+
+    .offer-glow {
+      position: absolute; width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(162,89,255,0.15) 0%, transparent 70%);
+      top: -100px; left: -100px; pointer-events: none;
+    }
+    .offer-glow2 {
+      position: absolute; width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(78,205,196,0.1) 0%, transparent 70%);
+      bottom: -80px; right: 50px; pointer-events: none;
+    }
+
+    .offer-label {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3);
+      color: var(--gold); font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 0.35rem 0.9rem; border-radius: 999px; margin-bottom: 1rem;
+    }
+
+    .offer-card h3 {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 900; letter-spacing: -1px; margin-bottom: 0.8rem;
+    }
+    .offer-card h3 em { font-style: normal; color: var(--accent); }
+
+    .offer-card p { color: var(--muted); font-size: 0.92rem; line-height: 1.6; max-width: 480px; }
+
+    .offer-includes {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.2rem;
+    }
+    .offer-tag {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      font-size: 0.72rem; color: var(--muted);
+      padding: 0.3rem 0.7rem; border-radius: 999px;
+    }
+
+    .offer-price-box {
+      text-align: center; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 2rem 2.5rem; min-width: 180px; position: relative;
+      flex-shrink: 0;
+    }
+    .offer-price-box .old-price {
+      font-size: 0.9rem; color: var(--muted);
+      text-decoration: line-through; margin-bottom: 0.2rem;
+    }
+    .offer-price-box .new-price {
+      font-size: 3rem; font-weight: 900; color: var(--gold);
+      letter-spacing: -2px; line-height: 1;
+    }
+    .offer-price-box .currency {
+      font-size: 1rem; font-weight: 400; color: var(--muted);
+    }
+    .offer-price-box .per { font-size: 0.75rem; color: var(--muted); margin-top: 0.2rem; }
+    .offer-price-box .savings {
+      display: inline-block; margin-top: 0.7rem;
+      background: rgba(78,205,196,0.15); border: 1px solid rgba(78,205,196,0.3);
+      color: var(--accent3); font-size: 0.7rem; font-weight: 700;
+      padding: 0.2rem 0.6rem; border-radius: 999px;
+    }
+
+    .btn-buy {
+      display: block; width: 100%; margin-top: 1.2rem;
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: #fff; font-weight: 700; font-size: 0.9rem;
+      padding: 0.9rem; border-radius: 12px; border: none;
+      cursor: pointer; transition: opacity .2s, transform .2s;
+      box-shadow: 0 4px 20px rgba(162,89,255,0.4);
+    }
+    .btn-buy:hover { opacity: 0.9; transform: scale(1.03); }
+
+    /* ── HOW IT WORKS ── */
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem; max-width: 1100px; margin: 0 auto; padding: 0 2rem 5rem;
+    }
+    .step-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; padding: 1.8rem;
+    }
+    .step-num {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
+      color: var(--accent); text-transform: uppercase; margin-bottom: 1rem;
+    }
+    .step-icon { font-size: 2rem; margin-bottom: 0.8rem; display: block; }
+    .step-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .step-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 4rem 2rem;
+    }
+    .testimonials-inner { max-width: 1100px; margin: 0 auto; }
+    .testimonials-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.2rem; margin-top: 2.5rem;
+    }
+    .t-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 1.5rem;
+    }
+    .t-stars { color: var(--gold); font-size: 0.85rem; margin-bottom: 0.7rem; }
+    .t-text { font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
+    .t-author { display: flex; align-items: center; gap: 0.7rem; }
+    .t-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent3));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .t-name { font-size: 0.82rem; font-weight: 600; }
+    .t-role { font-size: 0.72rem; color: var(--muted); }
+
+    /* ── CTA FINAL ── */
+    .cta-final {
+      max-width: 700px; margin: 0 auto; text-align: center;
+      padding: 5rem 2rem;
+    }
+    .cta-final h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900; letter-spacing: -1.5px; margin-bottom: 1rem;
+    }
+    .cta-final p { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+    .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text); font-weight: 600; font-size: 0.9rem;
+      padding: 0.9rem 2rem; border-radius: 999px; cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 2rem; text-align: center;
+      font-size: 0.78rem; color: var(--muted);
+    }
+    footer .logo { justify-content: center; margin-bottom: 0.5rem; font-size: 1rem; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 24px; padding: 2.5rem; max-width: 440px; width: 90%;
+      position: relative; transform: translateY(20px);
+      transition: transform .25s;
+    }
+    .modal-overlay.active .modal { transform: translateY(0); }
+
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: none; border: none; color: var(--muted);
+      font-size: 1.4rem; cursor: pointer; line-height: 1;
+    }
+    .modal-close:hover { color: var(--text); }
+
+    .modal h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.3rem; }
+    .modal .modal-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.8rem; }
+
+    .modal .price-display {
+      background: rgba(162,89,255,0.08); border: 1px solid rgba(162,89,255,0.25);
+      border-radius: 12px; padding: 1.2rem; text-align: center; margin-bottom: 1.5rem;
+    }
+    .modal .price-display .p-label { font-size: 0.7rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+    .modal .price-display .p-amount { font-size: 2.5rem; font-weight: 900; color: var(--gold); letter-spacing: -1px; }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.78rem; font-weight: 600; color: var(--muted); margin-bottom: 0.4rem; }
+    .form-group input, .form-group select {
+      width: 100%; background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); font-size: 0.9rem; padding: 0.75rem 1rem;
+      border-radius: 10px; outline: none; font-family: inherit;
+      transition: border-color .2s;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+    .form-group select option { background: var(--surface); }
+
+    .modal .genres-preview {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.2rem;
+    }
+    .genres-preview span {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      font-size: 0.65rem; color: var(--muted);
+      padding: 0.2rem 0.5rem; border-radius: 999px;
+    }
+
+    /* ── NOSTALGIA ── */
+    .nostalgia-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 5rem 2rem;
+    }
+    .nostalgia-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr auto;
+      gap: 4rem; align-items: center;
+    }
+    .nostalgia-text h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 900; letter-spacing: -1px;
+      margin-bottom: 1.2rem; line-height: 1.1;
+    }
+    .nostalgia-text h2 em { font-style: normal; color: var(--accent); }
+    .nostalgia-text p {
+      color: var(--muted); font-size: 0.92rem; line-height: 1.75;
+      margin-bottom: 0.9rem; max-width: 520px;
+    }
+    .nostalgia-tags {
+      display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.4rem;
+    }
+    .nostalgia-tags span {
+      background: rgba(162,89,255,0.08);
+      border: 1px solid rgba(162,89,255,0.2);
+      color: var(--accent); font-size: 0.75rem; font-weight: 500;
+      padding: 0.35rem 0.8rem; border-radius: 999px;
+    }
+
+    /* Vinyl */
+    .vinyl-wrap { padding: 1rem; }
+    .vinyl {
+      width: 200px; height: 200px; border-radius: 50%;
+      background: repeating-radial-gradient(
+        circle at center,
+        #0a0a0f 0px, #1a1a2e 4px, #0a0a0f 5px, #1a1a2e 8px
+      );
+      display: flex; align-items: center; justify-content: center;
+      animation: spin-vinyl 8s linear infinite;
+      box-shadow: 0 0 60px rgba(162,89,255,0.2), 0 20px 40px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    @keyframes spin-vinyl { to { transform: rotate(360deg); } }
+    .vinyl-center {
+      width: 70px; height: 70px; border-radius: 50%;
+      background: linear-gradient(135deg, #1e1e2e, #16161f);
+      border: 3px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1;
+    }
+    .vinyl-label {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      animation: spin-vinyl-reverse 8s linear infinite;
+      z-index: 2;
+    }
+    @keyframes spin-vinyl-reverse { to { transform: rotate(-360deg); } }
+    .vinyl-label span {
+      font-size: 0.65rem; font-weight: 800; color: var(--accent);
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .vinyl-label small { font-size: 0.5rem; color: var(--muted); margin-top: 0.1rem; }
+
+    @media (max-width: 700px) {
+      .nostalgia-inner { grid-template-columns: 1fr; }
+      .nostalgia-visual { display: none; }
+    }
+
+    /* ── WHATSAPP FLOAT ── */
+    .wa-float {
+      position: fixed; bottom: 1.8rem; right: 1.8rem; z-index: 999;
+      display: flex; align-items: center; gap: 0.6rem;
+      background: #25d366; color: #fff;
+      padding: 0.75rem 1.2rem 0.75rem 0.9rem;
+      border-radius: 999px; text-decoration: none;
+      font-size: 0.85rem; font-weight: 700;
+      box-shadow: 0 4px 24px rgba(37,211,102,0.45);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .wa-float:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 8px 32px rgba(37,211,102,0.55);
+    }
+    .wa-float span { white-space: nowrap; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+    @media (max-width: 640px) {
+      nav { padding: 1rem 1.2rem; }
+      .offer-card { grid-template-columns: 1fr; }
+      .offer-price-box { min-width: unset; }
+      .promo-banner { flex-direction: column; text-align: center; gap: 0.8rem; }
+      .promo-divider { width: 60px; height: 1px; }
+      .feature-item { padding: 0.8rem 1rem; }
+    }
+
+    /* ── SONGS MODAL ── */
+    .songs-overlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,0.85); backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity .25s;
+    }
+    .songs-overlay.active { opacity: 1; pointer-events: all; }
+
+    .songs-panel {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 24px; width: 92%; max-width: 500px;
+      max-height: 88vh; display: flex; flex-direction: column;
+      transform: translateY(30px); transition: transform .25s;
+      overflow: hidden;
+    }
+    .songs-overlay.active .songs-panel { transform: translateY(0); }
+
+    .songs-header {
+      padding: 1.4rem 1.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.9rem;
+      flex-shrink: 0;
+    }
+    .songs-header-icon { font-size: 2.2rem; line-height: 1; }
+    .songs-header-info { flex: 1; min-width: 0; }
+    .songs-header-info h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .songs-header-info span { font-size: 0.78rem; color: var(--muted); }
+    .songs-close {
+      background: none; border: none; color: var(--muted);
+      font-size: 1.3rem; cursor: pointer; padding: 0.3rem; line-height: 1; flex-shrink: 0;
+    }
+    .songs-close:hover { color: var(--text); }
+
+    .songs-list {
+      overflow-y: auto; flex: 1;
+      padding: 0.8rem 0;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+    .songs-list::-webkit-scrollbar { width: 4px; }
+    .songs-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .song-row {
+      display: flex; align-items: center; gap: 0.8rem;
+      padding: 0.55rem 1.6rem; transition: background .15s;
+    }
+    .song-row:hover { background: rgba(255,255,255,0.04); }
+    .song-num { font-size: 0.7rem; color: var(--muted); min-width: 18px; text-align: right; }
+    .song-note { font-size: 0.85rem; opacity: 0.5; flex-shrink: 0; }
+    .song-title { font-size: 0.82rem; color: var(--text); line-height: 1.4; flex: 1; }
+
+    .songs-more {
+      padding: 0.6rem 1.6rem 0.8rem;
+      font-size: 0.78rem; color: var(--muted);
+      font-style: italic; border-top: 1px solid var(--border);
+    }
+
+    .songs-footer {
+      padding: 1rem 1.6rem 1.4rem;
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      background: var(--card);
+    }
+    .songs-cta {
+      display: flex; align-items: center; justify-content: center; gap: 0.6rem;
+      width: 100%;
+      background: #25d366;
+      color: #fff; font-weight: 700; font-size: 0.95rem;
+      padding: 0.85rem 1.5rem; border-radius: 999px;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: opacity .2s; box-shadow: 0 4px 20px rgba(37,211,102,0.35);
+    }
+    .songs-cta:hover { opacity: 0.9; }
+    .songs-cta-sub { font-size: 0.72rem; color: var(--muted); text-align: center; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">
+      <span class="logo-icon">🎶</span>
+      Caja<span>Musical</span>
+    </div>
+
+    <div class="nav-search-wrap">
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="globalSearch" type="text" placeholder="Busca una canción o artista…" autocomplete="off">
+      </div>
+      <div id="searchResults" class="search-results" hidden></div>
+    </div>
+
+    <div class="nav-right">
+      <a href="../prodi-store/index.html" class="nav-back">
+        <span class="nav-back-icon" aria-hidden="true">←</span>
+        <span class="nav-back-label">ProDi</span>
+      </a>
+      <a href="https://wa.me/51914751914?text=Buenos%20d%C3%ADas%2C%20necesito%20informaci%C3%B3n%20del%20paquete" target="_blank" rel="noopener" class="nav-cta">Obtener Ahora — S/ 10</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <!-- Animated bars -->
+    <div class="bars" id="bars"></div>
+
+    <div class="badge">♫ &nbsp; <span id="badgeGenreCount">29</span> Géneros · Reguetón · Cumbia · Rock · Románticas · y más</div>
+
+    <h1>Tu mejor música<br/><em>seleccionada y actualizable,</em><br/>variedad de géneros</h1>
+    <p class="hero-sub">
+      Revive esas canciones que marcaron tu niñez, tu adolescencia
+      y los momentos que nunca olvidarás. Todo en un solo lugar y descargable para escucharla en cualquier lugar.
+    </p>
+
+    <!-- PROMO BANNER -->
+    <div class="promo-banner" id="oferta">
+      <span class="promo-badge">🔥 Limitado</span>
+      <div class="promo-text">
+        <span class="label">Oferta única</span>
+        <div class="price">S/ 10 <span>/ todo incluido</span></div>
+        <div class="desc">Pago único · Sin suscripciones</div>
+      </div>
+      <div class="promo-divider"></div>
+      <div class="promo-content">
+        <strong>Top géneros incluidos</strong>
+        <p>🔥 Reguetón &nbsp;·&nbsp; 🪗 Cumbia &nbsp;·&nbsp; 💕 Románticas<br>🦙 Folklore &nbsp;·&nbsp; 🎤 Rock Español &nbsp;·&nbsp; ⭐ Top Songs &nbsp;·&nbsp; y más</p>
+      </div>
+    </div>
+
+    <a href="https://wa.me/51914751914?text=Buenos%20d%C3%ADas%2C%20necesito%20informaci%C3%B3n%20del%20paquete" target="_blank" rel="noopener" class="btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      &nbsp; Quiero mi colección por S/ 10
+    </a>
+  </div>
+
+  <!-- FEATURES STRIP -->
+  <div class="features">
+    <div class="feature-item"><span class="icon">🎵</span><div><strong><span class="js-genre-count">29</span> géneros</strong><br/>Todos incluidos</div></div>
+    <div class="feature-item"><span class="icon">🎶</span><div><strong>+<span class="js-song-count">6,600</span> canciones</strong><br/>Colección curada</div></div>
+    <div class="feature-item"><span class="icon">⚡</span><div><strong>Acceso inmediato</strong><br/>Descarga al instante</div></div>
+    <div class="feature-item"><span class="icon">♾️</span><div><strong>Sin límites</strong><br/>Uso personal libre</div></div>
+    <div class="feature-item"><span class="icon">💰</span><div><strong>Pago único</strong><br/>Solo S/ 10</div></div>
+  </div>
+
+  <!-- NOSTALGIA SECTION -->
+  <div class="nostalgia-section">
+    <div class="nostalgia-inner">
+      <div class="nostalgia-text">
+        <div class="section-tag" style="margin-bottom:0.6rem;">🎵 &nbsp; Más que música</div>
+        <h2>Revive lo que<br/><em>nunca deberías olvidar</em></h2>
+        <p>
+          ¿Recuerdas esa canción que sonaba en casa cuando eras niño? ¿El tema que
+          pusiste en bucle durante tu primer amor? ¿La playlist que te acompañó en
+          esos viajes con amigos que ya no repites?
+        </p>
+        <p>
+          Nuestra colección está pensada para que esos momentos vuelvan — canciones
+          que ya no suenan en la radio pero que siguen viviendo en tu memoria.
+          Música que no caduca, seleccionada con cariño para que cada reproducción
+          sea un viaje en el tiempo.
+        </p>
+        <div class="nostalgia-tags">
+          <span>🧒 Canciones de infancia</span>
+          <span>💔 Primer amor</span>
+          <span>🌙 Noches de verano</span>
+          <span>🚗 Viajes en familia</span>
+          <span>📻 Clásicos de la radio</span>
+          <span>🎉 Fiestas inolvidables</span>
+        </div>
+      </div>
+      <div class="nostalgia-visual">
+        <div class="vinyl-wrap">
+          <div class="vinyl">
+            <div class="vinyl-center"></div>
+            <div class="vinyl-label">
+              <span>Caja Musical</span>
+              <small>Colección 2026</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENRES -->
+  <section>
+    <div class="section-header">
+      <div class="section-tag">📀 &nbsp; Catálogo completo</div>
+      <h2>Todos los géneros incluidos</h2>
+      <p>Una sola compra te da acceso a los <span class="js-genre-count">29</span> géneros de esta selección curada</p>
+    </div>
+    <div class="genre-grid" id="genreGrid"></div>
+  </section>
+
+  <!-- OFFER CARD -->
+  <div class="offer-section">
+    <div class="offer-card">
+      <div class="offer-glow"></div>
+      <div class="offer-glow2"></div>
+      <div>
+        <div class="offer-label">⚡ Promoción especial</div>
+        <h3>La colección <em>completa</em><br/>por solo S/ 10</h3>
+        <p>
+          Obtén acceso instantáneo a los <span class="js-genre-count">29</span> géneros musicales de nuestra colección curada.
+          Desde Canto Gregoriano y Violín Clásico hasta Reggaetón y Techno.
+          Un pago único, sin renovaciones, sin sorpresas.
+        </p>
+        <div class="offer-includes">
+          <span class="offer-tag">✓ <span class="js-genre-count">29</span> géneros</span>
+          <span class="offer-tag">✓ Alta calidad</span>
+          <span class="offer-tag">✓ Descarga directa</span>
+          <span class="offer-tag">✓ Pago único</span>
+          <span class="offer-tag">✓ Sin suscripción</span>
+          <span class="offer-tag">✓ Acceso inmediato</span>
+        </div>
+      </div>
+      <div class="offer-price-box">
+        <div class="old-price">S/ 50</div>
+        <div class="new-price">10 <span class="currency">soles</span></div>
+        <div class="per">pago único · todo incluido</div>
+        <div class="savings">Ahorras S/ 40</div>
+        <a href="https://wa.me/51914751914?text=Buenos%20d%C3%ADas%2C%20necesito%20informaci%C3%B3n%20del%20paquete" target="_blank" rel="noopener" class="btn-buy" style="text-decoration:none;display:block;text-align:center;">WhatsApp — Comprar ahora →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="steps">
+    <div style="grid-column: 1/-1; text-align:center; margin-bottom: 1.5rem;">
+      <div class="section-tag">📋 &nbsp; Proceso simple</div>
+      <h2 style="font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; letter-spacing: -1px;">¿Cómo funciona?</h2>
+    </div>
+    <div class="step-card">
+      <div class="step-num">Paso 01</div>
+      <span class="step-icon">💬</span>
+      <h4>Contáctanos por WhatsApp</h4>
+      <p>Haz clic en "obtener ahora" o escríbenos directamente por WhatsApp. Te respondemos con todo el detalle del catálogo.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">Paso 02</div>
+      <span class="step-icon">📝</span>
+      <h4>Brinda tus datos</h4>
+      <p>Comparte tu <strong>correo Gmail</strong> — lo necesitamos para compartirte la carpeta en Google Drive o te enviamos el enlace directo.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">Paso 03</div>
+      <span class="step-icon">💸</span>
+      <h4>Realiza el pago</h4>
+      <p>Paga S/ 10 por <strong>Plin</strong>, <strong>Yape</strong> o <strong>transferencia bancaria</strong> y envíanos la captura de pantalla como confirmación.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">Paso 04</div>
+      <span class="step-icon">🎧</span>
+      <h4>¡Recibe y disfruta!</h4>
+      <p>Compartimos la carpeta musical directamente a tu <strong>Google Drive</strong>. Acceso inmediato, sin restricciones, para siempre.</p>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="testimonials">
+    <div class="testimonials-inner">
+      <div class="section-header">
+        <div class="section-tag">💬 &nbsp; Lo que dicen</div>
+        <h2>Clientes satisfechos</h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="t-card">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-text">"Increíble colección, la música de electrónica y techno es de primera. Por S/ 10 es un regalo. 100% recomendado."</p>
+          <div class="t-author">
+            <div class="t-avatar">JM</div>
+            <div><div class="t-name">Juan M.</div><div class="t-role">DJ Amateur · Lima</div></div>
+          </div>
+        </div>
+        <div class="t-card">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-text">"Busqué música peruana y latina en varios sitios y esto es lo mejor que encontré. La cumbia y el reggaetón están excelentes."</p>
+          <div class="t-author">
+            <div class="t-avatar">KR</div>
+            <div><div class="t-name">Karen R.</div><div class="t-role">Organizadora de eventos</div></div>
+          </div>
+        </div>
+        <div class="t-card">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-text">"La variedad es lo que más me gustó. Desde música girly hasta rock, todo en un solo paquete. El precio es ridículamente bueno."</p>
+          <div class="t-author">
+            <div class="t-avatar">AP</div>
+            <div><div class="t-name">Andrea P.</div><div class="t-role">Creadora de contenido</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA FINAL -->
+  <div class="cta-final">
+    <h2>¿Listo para llenar tu mundo de música?</h2>
+    <p><span class="js-genre-count">29</span> géneros musicales. Una sola compra. S/ 10 que cambian tu experiencia musical para siempre.</p>
+    <div class="cta-buttons">
+      <a href="https://wa.me/51914751914?text=Buenos%20d%C3%ADas%2C%20necesito%20informaci%C3%B3n%20del%20paquete" target="_blank" rel="noopener" class="btn-primary" style="text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        &nbsp; Comprar por S/ 10
+      </a>
+      <button class="btn-secondary" onclick="document.getElementById('genreGrid').scrollIntoView({behavior:'smooth'})">Ver géneros</button>
+    </div>
+  </div>
+
+  <!-- WHATSAPP FLOAT -->
+  <a href="https://wa.me/51914751914?text=Buenos%20d%C3%ADas%2C%20necesito%20informaci%C3%B3n%20del%20paquete"
+     target="_blank" rel="noopener" class="wa-float" aria-label="Contactar por WhatsApp">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    <span>¡Escríbenos!</span>
+  </a>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="logo">🎶 Caja<span>Musical</span></div>
+    <p>© 2026 Caja Musical · Comparte · Descubre · Escucha · Oferta por tiempo limitado</p>
+  </footer>
+
+  <!-- SONGS MODAL -->
+  <div class="songs-overlay" id="songsOverlay" onclick="closeSongsModalOutside(event)">
+    <div class="songs-panel" id="songsPanel">
+      <div class="songs-header">
+        <span class="songs-header-icon" id="songsIcon"></span>
+        <div class="songs-header-info">
+          <h3 id="songsTitle"></h3>
+          <span id="songsSubtitle"></span>
+        </div>
+        <button class="songs-close" onclick="closeSongsModal()">✕</button>
+      </div>
+      <div class="songs-list" id="songsList"></div>
+      <div class="songs-more" id="songsMore"></div>
+      <div class="songs-footer">
+        <a class="songs-cta" id="songsCta" href="#" target="_blank">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Obtener colección por S/ 10
+        </a>
+        <p class="songs-cta-sub">Te enviamos el enlace de descarga por WhatsApp</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <h3>Obtener la colección</h3>
+      <p class="modal-sub">Completa tus datos y recibe tu música al instante</p>
+
+      <div class="price-display">
+        <div class="p-label">Total a pagar</div>
+        <div class="p-amount">S/ 10 <span style="font-size:1rem;font-weight:400;color:var(--muted)">soles</span></div>
+      </div>
+
+      <div class="genres-preview" id="genresPreviewMini"></div>
+
+      <div class="form-group">
+        <label>Tu nombre</label>
+        <input type="text" placeholder="Nombre completo" />
+      </div>
+      <div class="form-group">
+        <label>WhatsApp o correo</label>
+        <input type="text" placeholder="+51 999 999 999 o tu@correo.com" />
+      </div>
+      <div class="form-group">
+        <label>Método de pago</label>
+        <select>
+          <option>Yape</option>
+          <option>Plin</option>
+          <option>Transferencia bancaria</option>
+          <option>Efectivo</option>
+        </select>
+      </div>
+
+      <button class="btn-buy" onclick="confirmPurchase()">
+        ✓ &nbsp; Confirmar compra — S/ 10
+      </button>
+    </div>
+  </div>
+
+  <script src="data/catalog.js"></script>
+  <script>
+    // ── SONGS DATA (real, desde Google Drive vía data/catalog.js) ──
+    const WA_URL = 'https://wa.me/51914751914?text=Buenos%20d%C3%ADas%2C%20necesito%20informaci%C3%B3n%20del%20paquete';
+    const CATALOG = (window.CAJA_MUSICAL_CATALOG && window.CAJA_MUSICAL_CATALOG.categories) || [];
+
+    function cleanTitle(t) {
+      return t
+        .replace(/^y2mate\.com\s*[-–]\s*/i, '')
+        .replace(/^y2meta\.com\s*[-–]\s*/i, '')
+        .replace(/^yt1s\.com\s*[-–]\s*/i, '')
+        .replace(/^SnapSave\.io\s*[-–]\s*/i, '')
+        .replace(/\s*\(\s*MP3_\d+K\s*\)/gi, '')
+        .replace(/\s*\(\s*\d+\s*kbps\s*\)/gi, '')
+        .replace(/＂/g, '"').replace(/⧸/g, '/').replace(/｜/g, '|')
+        .trim();
+    }
+
+    // Iconos por género (coincidencia por palabra clave sobre el nombre real).
+    const GENRE_ICONS = [
+      [/regueton/i, '🔥'], [/cumbia/i, '🪗'], [/rock.*metal|metal/i, '🤘'],
+      [/rock/i, '🎤'], [/huayno/i, '🪘'], [/folklore|saya/i, '🦙'],
+      [/bachata/i, '🌹'], [/cristiana/i, '🙏'], [/salsa/i, '💃'],
+      [/chicha/i, '🪗'], [/infantil/i, '🧸'], [/merengue/i, '🥁'],
+      [/[eé]pico/i, '🌾'], [/indies|underground/i, '🎸'], [/criollos/i, '🎻'],
+      [/rom[aá]nticas/i, '💕'], [/trance|ambiente/i, '🌿'], [/girly/i, '💅'],
+      [/electr[oó]nica/i, '⚡'], [/hip hop|rap/i, '🎙️'], [/asi[aá]tico/i, '🌸'],
+      [/viol[ií]n/i, '🎻'], [/techno/i, '🎛️'], [/dark/i, '🌑'],
+      [/top canciones|^pop$/i, '⭐'], [/celtik|celtic|vocal/i, '🪈'],
+      [/gregoriano/i, '🕍'],
+    ];
+    function iconFor(name) {
+      const hit = GENRE_ICONS.find(([re]) => re.test(name));
+      return hit ? hit[1] : '🎵';
+    }
+
+    // ── SONGS MODAL LOGIC ──
+    function openSongsModal(name, icon, total) {
+      const cat = CATALOG.find(c => c.name === name);
+      const songs = cat ? cat.titles : [];
+      document.getElementById('songsIcon').textContent = icon;
+      document.getElementById('songsTitle').textContent = name;
+      document.getElementById('songsSubtitle').textContent = `${total} canciones disponibles`;
+      const list = document.getElementById('songsList');
+      list.innerHTML = songs.map((s, i) =>
+        `<div class="song-row">
+          <span class="song-num">${i + 1}</span>
+          <span class="song-note">♪</span>
+          <span class="song-title">${cleanTitle(s)}</span>
+        </div>`
+      ).join('');
+      document.getElementById('songsMore').textContent = '';
+      document.getElementById('songsCta').href = WA_URL;
+      const overlay = document.getElementById('songsOverlay');
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSongsModal() {
+      document.getElementById('songsOverlay').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function closeSongsModalOutside(e) {
+      if (e.target === document.getElementById('songsOverlay')) closeSongsModal();
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { closeSongsModal(); closeModal(); }
+    });
+
+    // ── GENRES — construidos desde el catálogo real (data/catalog.js) ──
+    const genres = CATALOG
+      .slice()
+      .sort((a, b) => b.total - a.total)
+      .map(c => ({ name: c.name, icon: iconFor(c.name), total: c.total }));
+
+    // ── BUILD GENRE GRID ──
+    const grid = document.getElementById('genreGrid');
+    const colors = ['#a259ff','#ff6b6b','#4ecdc4','#ffd700','#ff9a3c','#3b82f6','#ec4899'];
+
+    genres.forEach((g, i) => {
+      const c = colors[i % colors.length];
+      const card = document.createElement('a');
+      card.className = 'genre-card' + (i < 6 ? ' genre-hot' : '');
+      card.href = 'javascript:void(0)';
+      card.style.setProperty('--glow', c);
+      card.innerHTML = `
+        <span class="genre-icon">${g.icon}</span>
+        <span class="genre-name">${g.name}</span>
+        <span class="genre-count">${g.total} canciones</span>
+      `;
+      card.addEventListener('click', () => openSongsModal(g.name, g.icon, g.total));
+      grid.appendChild(card);
+    });
+
+    // ── BUILD MINI GENRES IN MODAL ──
+    const mini = document.getElementById('genresPreviewMini');
+    genres.forEach(g => {
+      const span = document.createElement('span');
+      span.textContent = `${g.icon} ${g.name}`;
+      mini.appendChild(span);
+    });
+
+    // ── STATS REALES (feature strip, badge, etc.) ──
+    const grandTotal = CATALOG.reduce((sum, c) => sum + c.total, 0);
+    const totalGenres = CATALOG.length;
+    document.querySelectorAll('.js-genre-count').forEach(n => n.textContent = totalGenres);
+    document.querySelectorAll('.js-song-count').forEach(n => n.textContent = grandTotal.toLocaleString('es-PE'));
+    const badgeCount = document.getElementById('badgeGenreCount');
+    if (badgeCount) badgeCount.textContent = totalGenres;
+
+    // ── BUSCADOR GLOBAL ──
+    const searchInput = document.getElementById('globalSearch');
+    const searchResultsEl = document.getElementById('searchResults');
+    let searchTimer = null;
+
+    function runSearch(q) {
+      const query = q.trim().toLowerCase();
+      if (query.length < 2) { searchResultsEl.hidden = true; searchResultsEl.innerHTML = ''; return; }
+      const matches = [];
+      for (const cat of CATALOG) {
+        for (const title of cat.titles) {
+          if (cleanTitle(title).toLowerCase().includes(query)) {
+            matches.push({ title: cleanTitle(title), genre: cat.name });
+            if (matches.length >= 30) break;
+          }
+        }
+        if (matches.length >= 30) break;
+      }
+      if (!matches.length) {
+        searchResultsEl.innerHTML = '<div class="search-empty-row">Sin resultados — escríbenos, seguro la tenemos.</div>';
+        searchResultsEl.hidden = false;
+        return;
+      }
+      searchResultsEl.innerHTML = matches.map(m => `
+        <div class="search-result-row" data-title="${m.title.replace(/"/g, '&quot;')}" data-genre="${m.genre.replace(/"/g, '&quot;')}">
+          <span class="srt">${m.title}</span>
+          <span class="src">${m.genre}</span>
+        </div>
+      `).join('');
+      searchResultsEl.querySelectorAll('.search-result-row').forEach(row => {
+        row.addEventListener('click', () => {
+          const url = `https://wa.me/51914751914?text=${encodeURIComponent(`Hola, quiero información sobre "${row.dataset.title}" (${row.dataset.genre}) de Caja Musical.`)}`;
+          window.open(url, '_blank');
+        });
+      });
+      searchResultsEl.hidden = false;
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', e => {
+        clearTimeout(searchTimer);
+        const val = e.target.value;
+        searchTimer = setTimeout(() => runSearch(val), 120);
+      });
+      document.addEventListener('click', e => {
+        if (!e.target.closest('.search-wrap') && !e.target.closest('.search-results')) {
+          searchResultsEl.hidden = true;
+        }
+      });
+    }
+
+    // ── ANIMATED BARS ──
+    const barsEl = document.getElementById('bars');
+    for (let i = 0; i < 60; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'bar';
+      const h = 20 + Math.random() * 80;
+      bar.style.height = h + '%';
+      bar.style.animationDelay = (Math.random() * 2) + 's';
+      bar.style.animationDuration = (1 + Math.random() * 1.5) + 's';
+      const colors2 = ['#a259ff','#4ecdc4','#ff6b6b'];
+      bar.style.background = colors2[Math.floor(Math.random() * colors2.length)];
+      barsEl.appendChild(bar);
+    }
+
+    // ── MODAL ──
+    function openModal() {
+      document.getElementById('modal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    function closeModalOutside(e) {
+      if (e.target === document.getElementById('modal')) closeModal();
+    }
+
+    function confirmPurchase() {
+      const modal = document.getElementById('modal');
+      modal.querySelector('.modal').innerHTML = `
+        <div style="text-align:center; padding: 1rem 0;">
+          <div style="font-size:3.5rem; margin-bottom:1rem;">🎉</div>
+          <h3 style="font-size:1.5rem; margin-bottom:0.5rem;">¡Pedido recibido!</h3>
+          <p style="color:var(--muted); font-size:0.88rem; line-height:1.6; margin-bottom:1.5rem;">
+            Gracias por tu compra. En breve recibirás tu colección musical por WhatsApp o correo.
+            <br/><br/>
+            <strong style="color:var(--gold)">Total pagado: S/ 10</strong>
+          </p>
+          <button class="btn-primary" onclick="closeModal()" style="display:inline-flex; padding:0.8rem 2rem;">
+            ♪ &nbsp; ¡Perfecto!
+          </button>
+        </div>
+      `;
+    }
+
+    // Close with ESC — handled by the songs modal keydown listener above
+  </script>
+</body>
+</html>

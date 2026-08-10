@@ -1,0 +1,13 @@
+# Assets sueltos que no usa el sitio (no referenciados en index.html)
+music-store/8cf8a457-8bf7-4439-bd1b-0dec7f3d07e6.png
+music-store/REEL.png
+music-store/SOLO IMAGEN.png
+music-store/VIDEO.png
+music-store/dee93133-4628-45f5-a893-a2c75ca46992.png
+music-store/ea840ed7-57ce-4a0b-9fcc-2fef73c8cf61.png
+music-store/veremos.png
+music-store/vert.png
+
+# OS / editor
+.DS_Store
+Thumbs.db

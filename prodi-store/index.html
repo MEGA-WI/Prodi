@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProDi — Productos Digitales | Biblioteca Digital</title>
+<meta name="description" content="ProDi — miles de libros digitales organizados por categoría. Explora el catálogo y consulta disponibilidad por WhatsApp.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2315110d'/%3E%3Ctext x='50' y='68' font-family='Georgia,serif' font-size='58' font-weight='700' fill='%23d9a441' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+<div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+
+<header class="site-header">
+  <a class="brand" href="#top">
+    <span class="brand-mark" aria-hidden="true">P</span>
+    <span class="brand-text">
+      <span class="brand-name">ProDi</span>
+      <span class="brand-sub">Productos Digitales</span>
+    </span>
+  </a>
+  <nav class="site-nav">
+    <a href="#categorias" class="nav-link">Catálogo</a>
+    <a href="#como-funciona" class="nav-link">Cómo funciona</a>
+    <a class="btn btn-music" href="../music-store/index.html">
+      <span class="btn-music-icon" aria-hidden="true">♪</span>
+      <span class="btn-music-label">ProdiMúsica</span>
+    </a>
+    <a id="nav-whatsapp" class="btn btn-whatsapp" href="#" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" class="icon-wa" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.05-1.35A10 10 0 1 0 12 2Zm0 18.2a8.17 8.17 0 0 1-4.17-1.14l-.3-.18-3.1.83.83-3.02-.2-.31A8.2 8.2 0 1 1 12 20.2Zm4.52-6.13c-.25-.12-1.47-.72-1.7-.8-.23-.08-.4-.12-.56.12-.17.25-.65.8-.8.96-.15.17-.29.19-.54.06-.25-.12-1.06-.39-2.02-1.24-.75-.66-1.25-1.48-1.4-1.73-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.44.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08 0 1.23.89 2.41 1.02 2.58.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.55.1.47-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.28Z"/></svg>
+      Escríbenos
+    </a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="hero-atmosphere" aria-hidden="true">
+      <span class="blob blob-gold"></span>
+      <span class="blob blob-violet"></span>
+    </div>
+    <div class="hero-copy">
+      <p class="eyebrow">Biblioteca digital · entrega por WhatsApp</p>
+      <h1 class="hero-title">Miles de historias<br>esperando en <em>tu bolsillo.</em></h1>
+      <p class="hero-sub">ProDi reúne <strong id="stat-total">—</strong> libros digitales organizados en <strong id="stat-categorias">—</strong> categorías: terror, fantasía, negocios, fe, romance, ciencia y mucho más. Explora, elige y escríbenos — nosotros te confirmamos disponibilidad y te enviamos el contenido.</p>
+      <div class="hero-actions">
+        <a href="#categorias" class="btn btn-primary">Explorar el catálogo</a>
+        <a id="hero-whatsapp" class="btn btn-ghost" href="#" target="_blank" rel="noopener">Escribir por WhatsApp →</a>
+      </div>
+      <div class="hero-stats">
+        <div><span id="stat-total-2">—</span><small>títulos disponibles</small></div>
+        <div><span id="stat-categorias-2">—</span><small>categorías curadas</small></div>
+        <div><span>100%</span><small>digital, entrega inmediata</small></div>
+      </div>
+    </div>
+    <div class="hero-shelf" aria-hidden="true" id="hero-shelf"></div>
+  </section>
+
+  <section class="search-band">
+    <div class="section-inner search-inner">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" class="icon-search" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="global-search" type="text" placeholder="Busca un título, autor o tema… (ej. “Stephen King”, “finanzas”, “dragones”)" autocomplete="off">
+        <span class="search-hint" id="search-hint"></span>
+      </div>
+      <div id="search-results" class="search-results" hidden></div>
+    </div>
+  </section>
+
+  <section id="categorias" class="catalog-band">
+    <div class="section-inner catalog">
+      <div class="section-head reveal">
+        <p class="eyebrow">El catálogo completo</p>
+        <h2>Elige una categoría</h2>
+        <p class="section-sub">Cada categoría muestra su catálogo completo. Busca, toca cualquier título y te escribimos — directo por WhatsApp.</p>
+      </div>
+      <div id="category-grid" class="category-grid"></div>
+    </div>
+  </section>
+
+  <section id="como-funciona" class="how-band">
+    <div class="how-atmosphere" aria-hidden="true"></div>
+    <div class="section-inner how">
+      <div class="section-head reveal">
+        <p class="eyebrow">Simple, directo, sin vueltas</p>
+        <h2>Cómo funciona</h2>
+      </div>
+      <div class="how-steps">
+        <div class="how-step reveal">
+          <span class="how-num">1</span>
+          <h3>Explora</h3>
+          <p>Recorre las categorías y encuentra los títulos que te interesan. Usa el buscador si ya sabes qué quieres.</p>
+        </div>
+        <div class="how-step reveal">
+          <span class="how-num">2</span>
+          <h3>Escríbenos</h3>
+          <p>Toca “Consultar por WhatsApp” — el mensaje se arma solo con el título o la categoría que elegiste.</p>
+        </div>
+        <div class="how-step reveal">
+          <span class="how-num">3</span>
+          <h3>Recibe tu contenido</h3>
+          <p>Te confirmamos disponibilidad y precio, y te compartimos el enlace de descarga por Drive.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-outer">
+    <div class="cta-atmosphere" aria-hidden="true"></div>
+    <div class="section-inner">
+      <div class="cta-band reveal">
+        <h2>¿No encuentras lo que buscas?</h2>
+        <p>Escríbenos directo — la biblioteca sigue creciendo cada semana y muchas veces tenemos más de lo que mostramos aquí.</p>
+        <a id="band-whatsapp" class="btn btn-primary btn-lg" href="#" target="_blank" rel="noopener">Escribir por WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer-band">
+  <div class="section-inner site-footer">
+    <div class="footer-brand">
+      <span class="brand-mark" aria-hidden="true">P</span>
+      <div>
+        <p class="brand-name">ProDi — Productos Digitales</p>
+        <p class="brand-sub">Biblioteca digital por categorías · entrega por WhatsApp y Google Drive</p>
+      </div>
+    </div>
+    <a id="footer-whatsapp" class="footer-whatsapp" href="#" target="_blank" rel="noopener">+51 914 751 914 · WhatsApp</a>
+  </div>
+</footer>
+
+<div class="modal-backdrop" id="modal-backdrop"></div>
+<div class="modal" id="category-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-header" id="modal-header">
+    <div class="modal-header-top">
+      <span class="modal-icon" id="modal-icon" aria-hidden="true"></span>
+      <button class="modal-close" id="modal-close" aria-label="Cerrar">✕</button>
+    </div>
+    <h3 id="modal-title"></h3>
+    <p class="modal-count" id="modal-count"></p>
+  </div>
+  <div class="modal-body">
+    <input id="modal-search" type="text" placeholder="Filtrar dentro de esta categoría…" autocomplete="off">
+    <ul id="modal-titles" class="modal-titles"></ul>
+  </div>
+  <div class="modal-footer">
+    <a id="modal-whatsapp" class="btn btn-primary" href="#" target="_blank" rel="noopener">Consultar esta categoría por WhatsApp</a>
+  </div>
+</div>
+
+<a id="floating-whatsapp" class="floating-whatsapp" href="#" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.05-1.35A10 10 0 1 0 12 2Zm0 18.2a8.17 8.17 0 0 1-4.17-1.14l-.3-.18-3.1.83.83-3.02-.2-.31A8.2 8.2 0 1 1 12 20.2Zm4.52-6.13c-.25-.12-1.47-.72-1.7-.8-.23-.08-.4-.12-.56.12-.17.25-.65.8-.8.96-.15.17-.29.19-.54.06-.25-.12-1.06-.39-2.02-1.24-.75-.66-1.25-1.48-1.4-1.73-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.44.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08 0 1.23.89 2.41 1.02 2.58.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.55.1.47-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.28Z"/></svg>
+  <span class="floating-ring"></span>
+</a>
+
+<script src="data/catalog.js"></script>
+<script src="app.js" defer></script>
+</body>
+</html>
