@@ -19,7 +19,7 @@ música: explorar → escribir por WhatsApp → confirmar → entregar por Googl
 | Producto        | Libros/audiolibros digitales organizados en 25 categorías        |
 | Catálogo fuente | `D:\Nueva carpeta\Biblioteca Digital - ProDi\ProDi - Libros`      |
 | Precio          | **No se muestra en el sitio** — se brinda por WhatsApp al consultar |
-| Contacto        | WhatsApp +51 914 751 914                                         |
+| Contacto        | WhatsApp +51 941 682 941                                         |
 | Entrega         | Enlace de Google Drive tras confirmar por WhatsApp                |
 
 ---
@@ -86,7 +86,7 @@ Esto sobrescribe `data/catalog.json` y `data/catalog.js`. No hace falta tocar el
   categoría que abren un panel con la lista completa + buscador propio, y cada título es
   clicable — abre WhatsApp con un mensaje pre-armado mencionando ese título exacto.
 - **WhatsApp en todos lados**: nav, hero, banda de cierre, footer y botón flotante — todos
-  apuntan a `+51 914 751 914` con mensajes contextuales (genérico, por categoría, o por título).
+  apuntan a `+51 941 682 941` con mensajes contextuales (genérico, por categoría, o por título).
 - **Secciones diferenciadas, no todo en una sola hoja**: cada sección es su propia banda de
   ancho completo con fondo/atmósfera propios (buscador = franja beige, catálogo = crema con
   patrón de puntos, "Cómo funciona" y el footer = banda oscura invertida a propósito, CTA final
@@ -120,7 +120,7 @@ Esto sobrescribe `data/catalog.json` y `data/catalog.js`. No hace falta tocar el
 
 ## Contacto y Ventas
 
-- **WhatsApp:** +51 914 751 914
+- **WhatsApp:** +51 941 682 941
 - **Entrega:** Google Drive, tras confirmar disponibilidad y método de pago por WhatsApp
 - **Plataforma:** sitio estático, `prodi-store/index.html` (desplegable en Vercel/Netlify sin cambios)
 

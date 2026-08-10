@@ -2,7 +2,7 @@
   "use strict";
 
   const CATALOG = window.PRODI_CATALOG || { categories: [], grand_total: 0 };
-  const WHATSAPP_NUMBER = "51914751914";
+  const WHATSAPP_NUMBER = "51941682941";
 
   /* ------------------------------------------------------------------ */
   /* Helpers                                                             */
