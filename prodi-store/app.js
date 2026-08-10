@@ -374,7 +374,7 @@
   /* ------------------------------------------------------------------ */
   /* WhatsApp CTAs genericos                                             */
   /* ------------------------------------------------------------------ */
-  const genericMsg = "Hola, quiero información sobre ProDi (Productos Digitales).";
+  const genericMsg = "Hola, quiero información sobre el paquete de ";
   ["nav-whatsapp", "hero-whatsapp", "band-whatsapp", "footer-whatsapp", "floating-whatsapp"].forEach((id) => {
     const node = document.getElementById(id);
     if (node) node.href = waLink(genericMsg);
